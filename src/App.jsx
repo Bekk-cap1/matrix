@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from "motion/react"
+import { m, motion, number } from "motion/react"
 import './App.css'
 
 function App() {
@@ -22,10 +22,7 @@ function App() {
     console.log(rowsSec);
     console.log(colsSec);
 
-    if (rows != cols) {
-      alert("если вы хотите только одну матрицу и найти determinant, то строка и столбцы должны быть одинаковы (2х2, 3х3, ...)")
-    }
-    if (rowsSec != 0 || colsSec != 0) {
+    if (rowsSec == 0 && colsSec > 0 || rowsSec > 0 && colsSec == 0) {
       setRowsSec(0)
       setColsSec(0)
       return alert("please check your items, second rows and cols must be write both of them or equal to 0")
@@ -76,6 +73,21 @@ function App() {
     }
     return det;
   }
+  function transpose(matrix) {
+    return matrix[0].map((_, index) =>
+      matrix.map(row => row[index])
+    )
+  }
+
+  function plus(a, b) {
+    if (a.length !== b.length || a[0].length !== b[0].length) {
+      throw new Error("Матрицы должны быть одинакового размера")
+    }
+    return a.map((row, i) =>
+      row.map((val, j) => val + b[i][j])
+    )
+
+  }
 
   const findElements = () => {
     if (data.length > 0 && dataSec.length === 0) {
@@ -87,22 +99,42 @@ function App() {
         return alert("зАполните все поля");
       }
 
-      if (rows === cols) {
+      if (rows == cols) {
         const det = determinant(data.map(row => row.map(Number)));
-        setResult({ determinant: det });
-      } else {
-        alert("Детерминант существует только у квадратных матриц");
+        setResult((prev) => ({
+          ...prev,
+          determinant: det
+        }));
+      }
+      const trans = transpose(data.map(row => row.map(Number)))
+      setResult(prev => ({
+        ...prev,
+        transpose: trans,
+        plus: "",
+        minus: "",
+        multiply: ""
+      }))
+    } else {
+      if (rows || cols || rowsSec || colsSec) {
+        const add = plus(
+          data.map(r => r.map(Number)),
+          dataSec.map(q => q.map(Number))
+        )
+        setResult((prev) => ({
+          ...prev,
+          plus: add,
+          determinant: "",
+          transpose: ""
+        }))
       }
     }
   };
 
 
-  console.log(result);
-
 
   return (
     <>
-      <div className="justify-center text-center">
+      <div className="justify-center text-center mx-auto w-full">
         <motion.div className='flex items-center justify-center gap-4'>
           <div>
             <label htmlFor="col-matrix">First Write matrix cols</label> <br />
@@ -161,12 +193,12 @@ function App() {
         <div className='flex justify-between gap-10 mx-5 my-2'>
           {
             data.length > 0 && (
-              <table className="table-auto w-full mt-5">
+              <table className="w-full mt-5">
                 <tbody>
                   {data.map((row, rowsI) => (
                     <tr key={rowsI}>
                       {row.map((cell, cIndex) => (
-                        <td key={cIndex} className="border">
+                        <td key={cIndex} className="">
                           <input
                             type="number"
                             value={cell}
@@ -185,12 +217,12 @@ function App() {
           }
           {
             dataSec.length > 0 && (
-              <table className="table-auto border-collapse border border-gray-400 w-full mt-5">
+              <table className="w-full mt-5">
                 <tbody>
                   {dataSec.map((row, rowsI) => (
                     <tr key={rowsI}>
                       {row.map((cell, cIndex) => (
-                        <td key={cIndex} className="border">
+                        <td key={cIndex} className="">
                           <input
                             type="number"
                             value={cell}
@@ -210,8 +242,46 @@ function App() {
         </div>
         <button className='btn btn-success btn-md' onClick={findElements}>Find</button>
         <h2>Results:</h2>
-        <ul>
+        <ul className=''>
           <li>Determinant: {result.determinant}</li>
+          <li>Minus: {result.minus + " "}
+          </li>
+          <li>Transpose:
+            <table className='w-full justify-center'>
+              <tbody>
+                {
+                  result.transpose !== "" && result.transpose.map((_, index) => (
+                    <tr>
+                      {
+                        result.transpose !== "" && result.transpose[index].map(e => (
+                          <td className={`border-2 border-amber-50 w-1/${result.transpose[index].length}`}>{e}</td>
+                        ))
+                      }
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </li>
+          <li>Plus:
+            <table className='w-full justify-center'>
+              <tbody>
+                {
+                  result.plus !== "" && result.plus.map((item, i) => (
+                    <tr>
+                      {
+                        result.plus !== "" && result.plus[i].map(e => (
+                          <td className={`border-2 border-amber-50 w-1/${result.plus[i].length}`}>{e}</td>
+                        ))
+                      }
+                    </tr>
+
+                  ))
+                }
+              </tbody>
+            </table>
+          </li>
+          <li>Multiply: {result.multiply}</li>
         </ul>
       </div>
     </>
