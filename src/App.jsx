@@ -81,13 +81,36 @@ function App() {
 
   function plus(a, b) {
     if (a.length !== b.length || a[0].length !== b[0].length) {
-      throw new Error("Матрицы должны быть одинакового размера")
+      alert("Матрицы должны быть одинакового размера")
+    }else{
+      return a.map((row, i) =>
+        row.map((val, j) => val + b[i][j])
+      )
     }
-    return a.map((row, i) =>
-      row.map((val, j) => val + b[i][j])
-    )
-
   }
+
+  function minus(a, b) {
+    if (a.length !== b.length || a[0].length !== b[0].length) {
+      alert("Матрицы должны быть одинакового размера")
+    }else{
+      return a.map((row, i) =>
+        row.map((val, j) => val - b[i][j])
+      )
+    }
+  }
+
+  function multiplyMatrices(a, b) {
+    if (a[0].length !== b.length) {
+      alert("Количество столбцов A должно быть равно количеству строк B");
+    }
+
+    return a.map((row, i) =>
+      b[0].map((_, j) =>
+        row.reduce((sum, _, k) => sum + a[i][k] * b[k][j], 0)
+      )
+    );
+  }
+
 
   const findElements = () => {
     if (data.length > 0 && dataSec.length === 0) {
@@ -120,16 +143,35 @@ function App() {
           data.map(r => r.map(Number)),
           dataSec.map(q => q.map(Number))
         )
+        const min = minus(
+          data.map(r => r.map(Number)),
+          dataSec.map(q => q.map(Number))
+        )
+        const multiply = multiplyMatrices(
+          data.map(r => r.map(Number)),
+          dataSec.map(q => q.map(Number))
+        )
         setResult((prev) => ({
           ...prev,
           plus: add,
+          multiply: multiply,
+          minus: min,
           determinant: "",
           transpose: ""
         }))
+
       }
     }
   };
 
+
+  // console.log(result.plus == "" && result.plus.some(q=>q == NaN));
+//   result.plus !== "" && result.plus.map((e)=>
+//     e.map((q)=>{
+//       console.log(q);
+//     })
+// )
+  
 
 
   return (
@@ -141,7 +183,7 @@ function App() {
             <input
               value={cols}
               type="number"
-              max={5}
+              max={10}
               name="column"
               id='col-matrix'
               className='p-1 my-2 border-1 border-blue-500 outline-none'
@@ -151,7 +193,7 @@ function App() {
             <input
               value={rows}
               type="number"
-              max={5}
+              max={10}
               name='rows'
               id='rows-matrix'
               className='p-1 my-2 border-1 border-blue-500 outline-none'
@@ -243,17 +285,33 @@ function App() {
         <button className='btn btn-success btn-md' onClick={findElements}>Find</button>
         <h2>Results:</h2>
         <ul className=''>
-          <li>Determinant: {result.determinant}</li>
-          <li>Minus: {result.minus + " "}
-          </li>
-          <li>Transpose:
+          <li className='mt-10'>Determinant: {result.determinant}</li>
+          <li className='mt-10'>Minus: 
             <table className='w-full justify-center'>
               <tbody>
                 {
-                  result.transpose !== "" && result.transpose.map((_, index) => (
+                  result.minus !== "" && result?.minus?.map((item, i) => (
                     <tr>
                       {
-                        result.transpose !== "" && result.transpose[index].map(e => (
+                        result.minus !== "" && result.minus[i].map(e => (
+                          <td className={`border-2 border-amber-50 w-1/${result.minus[i].length}`}>{e}</td>
+                        ))
+                      }
+                    </tr>
+
+                  ))
+                }
+              </tbody>
+            </table>
+          </li>
+          <li className='mt-10'>Transpose:
+            <table className='w-full justify-center'>
+              <tbody>
+                {
+                  result.transpose !== "" && result?.transpose?.map((_, index) => (
+                    <tr>
+                      {
+                        result.transpose !== "" && result?.transpose[index].map(e => (
                           <td className={`border-2 border-amber-50 w-1/${result.transpose[index].length}`}>{e}</td>
                         ))
                       }
@@ -263,11 +321,11 @@ function App() {
               </tbody>
             </table>
           </li>
-          <li>Plus:
+          <li className='mt-10'>Plus:
             <table className='w-full justify-center'>
               <tbody>
                 {
-                  result.plus !== "" && result.plus.map((item, i) => (
+                  result.plus !== "" && result?.plus?.map((item, i) => (
                     <tr>
                       {
                         result.plus !== "" && result.plus[i].map(e => (
@@ -281,7 +339,23 @@ function App() {
               </tbody>
             </table>
           </li>
-          <li>Multiply: {result.multiply}</li>
+          <li className='mt-10'>Multiply:
+            <table className='w-full justify-center'>
+              <tbody>
+                {
+                  result.multiply !== "" && result?.multiply?.map((_, index) => (
+                    <tr>
+                      {
+                        result.multiply !== "" && result.multiply[index].map(e => (
+                          <td className={`border-2 border-amber-50 w-1/${result.multiply[index].length}`}>{e}</td>
+                        ))
+                      }
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </li>
         </ul>
       </div>
     </>
